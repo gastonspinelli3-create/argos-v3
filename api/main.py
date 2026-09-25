@@ -1,19 +1,16 @@
-
-from fastapi import FastAPI, Depends, Header, HTTPException, Request, UploadFile, File, Form
+from fastapi import FastAPI, Header, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-import os, hashlib, json
+import os, hashlib
 import asyncpg
 from contextlib import asynccontextmanager
 from typing import Optional
 
-SEED_TOKEN="fvJ9-OwYEY9qtoUgtx0xyGC4ZVmH_Rjx2tRtp4F-qI"
 SEED_HASH="7be066312bd91c7faa402bfac63ddea16de0fab589b53aba564e79b9c9b82411"
 SEED_TENANT="argos_ent_pilot_90"
 
 async def seed_db():
     dsn=os.getenv("DATABASE_URL")
     if not dsn:
-        print("No DATABASE_URL, skip seed")
         return
     try:
         conn=await asyncpg.connect(dsn)
@@ -23,7 +20,7 @@ async def seed_db():
         await conn.close()
         print(f"AUTO-SEED OK: {SEED_TENANT}")
     except Exception as e:
-        print(f"AUTO-SEED FAIL: {e}")
+        print(f"SEED FAIL: {e}")
 
 @asynccontextmanager
 async def lifespan(app):
@@ -35,37 +32,28 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 def hash_token(t): return hashlib.sha256(t.encode()).hexdigest()
 
-async def get_db():
-    conn=await asyncpg.connect(os.getenv("DATABASE_URL"))
-    try:
-        yield conn
-    finally:
-        await conn.close()
-
 @app.get("/")
 async def root():
-    # Sin auth para que Render marque LIVE
-    return {"product":"ARGOS V3.0","status":"LIVE","version":"3.0.2","seed":SEED_TENANT,"tagline":"You don't have to teach ARGOS where to look."}
+    return {"product":"ARGOS V3.0","status":"LIVE","version":"3.0.2","seed":SEED_TENANT}
 
 @app.get("/health")
 async def health():
-    return {"ok":True}
+    return {"ok": True}
 
 @app.get("/opportunities")
 async def get_opps(x_tenant_token: Optional[str]=Header(None, alias="X-Tenant-Token")):
     if not x_tenant_token:
-        raise HTTPException(401, "Missing X-Tenant-Token")
-    dsn=os.getenv("DATABASE_URL")
-    conn=await asyncpg.connect(dsn)
+        raise HTTPException(status_code=401, detail="Missing X-Tenant-Token")
+    conn=await asyncpg.connect(os.getenv("DATABASE_URL"))
     row=await conn.fetchrow("SELECT id FROM tenants WHERE token_hash=$1", hash_token(x_tenant_token))
     await conn.close()
     if not row:
-        raise HTTPException(401, "Invalid token - tenant not found")
-    return [{"id":"CASE_001_MIDLAND_FIREBIRD_54K","basin_id":"midland","county":"Upton","status":"live"}]
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return [{"id":"CASE_001","basin_id":"midland","status":"live"}]
 
 @app.post("/upload/private-data")
 async def upload(file: UploadFile=File(...), x_tenant_token: Optional[str]=Header(None, alias="X-Tenant-Token")):
     if not x_tenant_token:
-        raise HTTPException(401, "Missing X-Tenant-Token")
+        raise HTTPException(status_code=401, detail="Missing X-Tenant-Token")
     content=await file.read()
-    return {"status":"uploaded","size":len(content),"filename":file.filename,"result":{"excess_bpd":1400}}
+    return {"status":"uploaded","size":len(content),"filename":file.filename}
