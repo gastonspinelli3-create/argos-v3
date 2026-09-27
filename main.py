@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Header
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
+from pathlib import Path
 
 app = FastAPI(title="ARGOS V3", version="3.0.9-final")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -10,6 +12,10 @@ def ok_token(t: str) -> bool:
 
 @app.get("/")
 def root():
+    return HTMLResponse((Path(__file__).parent / "index.html").read_text(encoding="utf-8"))
+
+@app.get("/api/status")
+def api_status():
     return {"product":"ARGOS V3.0","status":"LIVE","version":"3.0.9-final","seed":"argos_ent_pilot_90"}
 
 @app.get("/health")
