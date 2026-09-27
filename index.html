@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07121b">
+  <title>ARGOS — Inteligencia de oportunidades</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07121b;--panel:#10202b;--line:#29404b;--text:#eef5f5;--muted:#a8bec4;--accent:#43dbc7}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 85% 5%,#123c46 0,transparent 36%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+    a{color:var(--accent)}
+    .wrap{max-width:1050px;margin:auto;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:14px 0}
+    .brand{font-size:1.3rem;font-weight:800;letter-spacing:.16em}
+    .pill{padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.85rem}
+    main{padding:85px 0 55px}
+    .eyebrow{color:var(--accent);font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+    h1{font-size:clamp(2.4rem,7vw,5.3rem);line-height:1.07;letter-spacing:-.045em;max-width:820px;margin:18px 0}
+    .intro{font-size:clamp(1.05rem,2vw,1.25rem);max-width:700px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:40px 0}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}
+    .card strong{color:var(--accent);font-size:.78rem;letter-spacing:.12em}
+    .card h2{font-size:1.18rem;margin:16px 0 7px}
+    .card p{color:var(--muted);margin:0}
+    .status{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--line);padding:26px 0;color:var(--muted)}
+    .status b{color:var(--text)}
+    footer{border-top:1px solid var(--line);padding:25px 0;color:var(--muted);font-size:.9rem}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding-top:55px}.status{align-items:start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><div class="brand">ARGOS</div><div class="pill">Bottleneck Intelligence</div></header>
+    <main>
+      <div class="eyebrow">Inteligencia de oportunidades</div>
+      <h1>Detectar señales. Conectar evidencia. Decidir mejor.</h1>
+      <p class="intro">ARGOS organiza señales públicas y privadas para investigar posibles cuellos de botella e identificar dónde conviene profundizar. Cada oportunidad requiere fuentes trazables y validación antes de convertirse en una decisión comercial.</p>
+      <div class="grid">
+        <section class="card"><strong>01 / OBSERVAR</strong><h2>Señales</h2><p>Reunir información sobre actividad, infraestructura y cambios del mercado.</p></section>
+        <section class="card"><strong>02 / CONTRASTAR</strong><h2>Evidencia</h2><p>Separar hechos comprobados de inferencias e hipótesis pendientes.</p></section>
+        <section class="card"><strong>03 / ACTUAR</strong><h2>Oportunidades</h2><p>Priorizar investigación y próximos pasos para el equipo comercial.</p></section>
+      </div>
+      <div class="status"><div><b>Estado de la API</b><br><span id="health" role="status" aria-live="polite">Comprobando conexión…</span></div><a href="/docs">Documentación técnica de la API</a></div>
+    </main>
+    <footer>ARGOS · Una señal o hipótesis no constituye por sí sola una oportunidad verificada.</footer>
+  </div>
+  <script>
+    fetch('/health',{cache:'no-store'})
+      .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()})
+      .then(data=>{document.getElementById('health').textContent=data.ok===true?'Servicio en línea':'Estado no confirmado'})
+      .catch(()=>{document.getElementById('health').textContent='No se pudo comprobar el servicio'});
+  </script>
+</body>
+</html>
